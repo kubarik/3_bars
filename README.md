@@ -10,33 +10,38 @@
 
 Сначала получаем десериализацию JSON, с помощью функции:
 ```python
-load_data(filepath)
+load_data(file_path)
 ```
 где
-  filepath - путь до файла с произвольными данными в формате JSON.
+  file_path - путь до файла с произвольными данными в формате JSON.
 Если по указанному пути нет файла, то попытаемся его забрать с URLа
 ```python
-url_json = 'https://apidata.mos.ru/v1/features/1796?api_key=c9d98de8f9a903176268131e2a9821d4'
-barsjson = urlopen(url_json)
+url_json = 'https://apidata.mos.ru/v1/features/1796?api_key=...'
+response = urlopen(url_json)
 ```
 
 В случае успеха, выполняется функции и получаем результат:
 ```python
-print ("самый большой бар: ", get_biggest_bar(deserializes_json))
-print ("самый маленький бар: ", get_smallest_bar(deserializes_json))
-print("самый близкий бар: ", get_closest_bar(deserializes_json, longitude, latitude))
+print ("самый большой бар: ", get_biggest_bar(bars_json['features']))
+print ("самый маленький бар: ", get_smallest_bar(bars_json['features']))
+print("самый близкий бар: ", get_closest_bar(bars_json['features']))
 ```
 где
-  deserializes_json - JSON, загруженный из файла.
-  longitude и latitude - gps-координаты, введенные пользователем с клавиатуры
+  bars_json - JSON, загруженный из файла.
+
+В функции **get_closest_bar** (определение ближайшего бара), значения gps-координат *longitude* и *latitude*, пользователь вводит с клавиатуры
+```python
+longitude = float(input('Enter longitude:'))
+latitude = float(input('Enter latitude:'))
+```
 
 Импортируемые модули
 ```python
 import json #кодирование и декодирование данных
 import os #для работы с ОС
 import re #работа с регулярными выражениями
-from urllib.request import urlopen #работа с HTTP
 from math import sqrt
+from urllib.request import urlopen #работа с HTTP
 ```
 
 # Как запустить
