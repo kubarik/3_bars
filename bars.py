@@ -1,15 +1,17 @@
 import json
 import os
 import re
+import requests
 from math import sqrt
-from urllib.request import urlopen
 
 
 def load_data(file_path):
     if os.path.isfile(file_path) is False:
-        url_json = 'https://apidata.mos.ru/v1/features/1796?api_key=c9d98de8f9a903176268131e2a9821d4'
-        response = urlopen(url_json)
-        response_json = json.loads(response.read().decode('utf-8'))
+        url_json = 'https://apidata.mos.ru/v1/features/1796'
+        params = {'api_key':'c9d98de8f9a903176268131e2a9821d4'}
+        response = requests.get(url_json, params)
+        response.encoding = 'UTF-8'
+        response_json = json.loads(response.content)
         with open(file_path, 'w') as file_save:
             json.dump(response_json, file_save)
         return response_json
