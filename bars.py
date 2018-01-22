@@ -1,65 +1,67 @@
 import json
-import os
 import re
-import requests
+import sys
 from math import sqrt
 
 
 def load_data(file_path):
-    if os.path.isfile(file_path) is False:
-        url_json = 'https://apidata.mos.ru/v1/features/1796'
-        params = {'api_key':'c9d98de8f9a903176268131e2a9821d4'}
-        response = requests.get(url_json, params)
-        response.encoding = 'UTF-8'
-        response_json = json.loads(response.content)
-        with open(file_path, 'w') as file_save:
-            json.dump(response_json, file_save)
-        return response_json
-    else:
-        return json.load(open(file_path))
+    try:
+        with open(file_path, 'r') as file_handler:
+            return json.load(file_handler)
+    except OSError:
+        return False
 
 
-def get_biggest_bar(features):
-    bar = max(features, key=lambda x: x['properties']['Attributes']['SeatsCount'])
-
-    return bar['properties']['Attributes']['Name'] if bar else 'failed'
+def get_biggest_bar(bars):
+    return max(bars, key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
 
 
-def get_smallest_bar(features):
-    bar = min(features, key=lambda x: x['properties']['Attributes']['SeatsCount'])
-
-    return bar['properties']['Attributes']['Name'] if bar else 'failed'
+def get_smallest_bar(bars):
+    return min(bars, key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
 
 
-def get_closest_bar(features):
+def distance(bar, coordinates):
+    bar_longitude = bar['geometry']['coordinates'][0]
+    bar_latitude = bar['geometry']['coordinates'][1]
 
-    longitude = float(input('Enter longitude:'))
-    latitude = float(input('Enter latitude:'))
+    return sqrt((bar_longitude - coordinates[0])**2 + (bar_latitude - coordinates[1])**2)
 
+
+def get_closest_bar(bars, coordinates):
+    return min(bars, key=lambda bar: distance(bar, coordinates))
+
+
+def get_gps_coordinates(label):
     reg_exp = '^-?[0-9]{1,3}(?:\.[0-9]{1,10})?$'
+    coordinate = input(label)
+    while not re.match(reg_exp, coordinate):
+        coordinate = input(label)
 
-    if not re.match(reg_exp, str(longitude)) or not re.match(reg_exp, str(longitude)):
-        print('entered data is not correct')
+    return float(coordinate)
 
-    closest_distance = None
-    bar = None
-    for geometry in features:
-        geometry_longitude = geometry['geometry']['coordinates'][0]
-        geometry_latitude = geometry['geometry']['coordinates'][1]
 
-        distance = sqrt((geometry_longitude - longitude)**2 + (geometry_latitude - latitude)**2)
-
-        if closest_distance is None or closest_distance > distance:
-            bar = geometry
-            closest_distance = distance
-
-    return bar['properties']['Attributes']['Name'] if not (bar is None) else 'failed'
+def output_bar_name(label, bar):
+    print(label, bar['properties']['Attributes']['Name'] if not (bar is None) else 'failed')
 
 
 if __name__ == '__main__':
 
-    bars_json = load_data('bars.json')
+    if len(sys.argv) < 2:
+        sys.exit('Не указан файл к справочнику баров')
+
+    file_bars_path = sys.argv[1]
+    bars_json = load_data(file_bars_path)
     if bars_json:
-        print('самый большой бар: ', get_biggest_bar(bars_json['features']))
-        print('самый маленький бар: ', get_smallest_bar(bars_json['features']))
-        print('самый близкий бар: ', get_closest_bar(bars_json['features']))
+        coordinates = [
+            get_gps_coordinates('Введите долготу: '),
+            get_gps_coordinates('Введите широту: ')
+        ]
+
+        bar = get_closest_bar(bars_json['features'], coordinates)
+        output_bar_name('самый близкий бар: ', bar)
+
+        bar = get_biggest_bar(bars_json['features'])
+        output_bar_name('самый большой бар: ', bar)
+
+        bar = get_smallest_bar(bars_json['features'])
+        output_bar_name('самый маленький бар: ', bar)

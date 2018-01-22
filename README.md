@@ -2,66 +2,73 @@
 
 На основании открытых данных (data.mos.ru), скрипт определяет:
 
+- самый близкий бар (текущие gps-координаты пользователь введет с клавиатуры).
 - самый большой бар;
 - самый маленький бар;
-- самый близкий бар (текущие gps-координаты пользователь введет с клавиатуры).
 
 # Как использовать
+
+На сайте data.mos.ru есть много разных данных, в том числе список московских баров.
+Его можно скачать в формате JSON. Для этого нужно:
+
++ зарегистрироваться на сайте и получить ключ API;
++ скачать файл по ссылке вида https://apidata.mos.ru/v1/features/1796?api_key={place_your_API_key_here}.
+А можно не тратить на это время и воспользоваться файлом bars.json.
+
+Импортируемые модули
+```python
+import json #кодирование и декодирование данных
+import re #работа с регулярными выражениями
+import sys
+from math import sqrt
+```
 
 Сначала получаем десериализацию JSON, с помощью функции:
 ```python
 load_data(file_path)
 ```
 где
-  file_path - путь до файла с произвольными данными в формате JSON.
-Если по указанному пути нет файла, то попытаемся его забрать с URLа
-```python
-url_json = 'https://apidata.mos.ru/v1/features/1796?api_key=...'
-response = urlopen(url_json)
-```
+  file_path - путь до файла (например: bars.json) с данными в формате JSON.
 
-В случае успеха, выполняется функции и получаем результат:
+Функция ввода координат gps:
 ```python
-print ("самый большой бар: ", get_biggest_bar(bars_json['features']))
-print ("самый маленький бар: ", get_smallest_bar(bars_json['features']))
-print("самый близкий бар: ", get_closest_bar(bars_json['features']))
+get_gps_coordinates(label)
 ```
 где
-  bars_json - JSON, загруженный из файла.
+  label - текстовое предложение о вводе.
 
-В функции **get_closest_bar** (определение ближайшего бара), значения gps-координат *longitude* и *latitude*, пользователь вводит с клавиатуры
+Функция определения ближайшего бара:
 ```python
-longitude = float(input('Enter longitude:'))
-latitude = float(input('Enter latitude:'))
+get_closest_bar(bars, coordinates)
 ```
+где
+  bars - список баров.
+  coordinates - введенные кооррдинаты.
 
-Импортируемые модули
+Функция определения самого большого бара:
 ```python
-import json #кодирование и декодирование данных
-import os #для работы с ОС
-import re #работа с регулярными выражениями
-from math import sqrt
-from urllib.request import urlopen #работа с HTTP
+get_biggest_bar(bars)
 ```
+где
+  bars - список баров.
 
-# Как запустить
-
-Скрипт требует для своей работы установленного интерпретатора Python версии 3.5
-
-Запуск на Linux:
+Функция определения самого маленького бара:
+```python
+get_smallest_bar(bars)
+```
+где
+  bars - список баров.
 
 ```bash
 
-$ python bars.py
-# Пример ответа
+Запус и ответ
+$ python bars.py <path to file bars>
+Enter longitude: 33
+Enter latitude: 22
+самый близкий бар:  Корпорация Бар
 самый большой бар:  Спорт бар «Красная машина»
 самый маленький бар:  Сушистор
-Enter longitude:33
-Enter latitude:32.1
-самый близкий бар:  Корпорация Бар
 ```
-
-Запуск на Windows происходит аналогично.
 
 # Цели проекта
 
