@@ -13,18 +13,21 @@ def load_data(file_path):
 
 
 def get_biggest_bar(bars):
-    return max(bars, key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
+    return max(bars,
+               key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
 
 
 def get_smallest_bar(bars):
-    return min(bars, key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
+    return min(bars,
+               key=lambda bar: bar['properties']['Attributes']['SeatsCount'])
 
 
 def distance(bar, coordinates):
     bar_longitude = bar['geometry']['coordinates'][0]
     bar_latitude = bar['geometry']['coordinates'][1]
 
-    return sqrt((bar_longitude - coordinates[0])**2 + (bar_latitude - coordinates[1])**2)
+    return sqrt((bar_longitude - coordinates[0])**2 +
+                (bar_latitude - coordinates[1])**2)
 
 
 def get_closest_bar(bars, coordinates):
@@ -41,7 +44,7 @@ def get_gps_coordinates(label):
 
 
 def output_bar_name(label, bar):
-    print(label, bar['properties']['Attributes']['Name'] if not (bar is None) else 'failed')
+    print(label, bar['properties']['Attributes']['Name'] if bar else 'failed')
 
 
 if __name__ == '__main__':
@@ -50,18 +53,19 @@ if __name__ == '__main__':
         sys.exit('Не указан файл к справочнику баров')
 
     file_bars_path = sys.argv[1]
-    bars_json = load_data(file_bars_path)
-    if bars_json:
+    deserializes_json = load_data(file_bars_path)
+    if deserializes_json:
+        bars = deserializes_json['features']
         coordinates = [
             get_gps_coordinates('Введите долготу: '),
             get_gps_coordinates('Введите широту: ')
         ]
 
-        bar = get_closest_bar(bars_json['features'], coordinates)
+        bar = get_closest_bar(bars, coordinates)
         output_bar_name('самый близкий бар: ', bar)
 
-        bar = get_biggest_bar(bars_json['features'])
+        bar = get_biggest_bar(bars)
         output_bar_name('самый большой бар: ', bar)
 
-        bar = get_smallest_bar(bars_json['features'])
+        bar = get_smallest_bar(bars)
         output_bar_name('самый маленький бар: ', bar)

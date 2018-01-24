@@ -13,7 +13,8 @@
 
 + зарегистрироваться на сайте и получить ключ API;
 + скачать файл по ссылке вида https://apidata.mos.ru/v1/features/1796?api_key={place_your_API_key_here}.
-А можно не тратить на это время и воспользоваться файлом bars.json.
+А можно не тратить на это время и воспользоваться файлом bars.json или
+[скачать](https://raw.githubusercontent.com/kubarik/3_bars/master/bars.json "Московские бары").
 
 Импортируемые модули
 ```python
