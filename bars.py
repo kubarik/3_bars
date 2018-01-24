@@ -37,8 +37,8 @@ def get_closest_bar(bars, coordinates):
 def get_gps_coordinates(label):
     reg_exp = '^-?[0-9]{1,3}(?:\.[0-9]{1,10})?$'
     coordinate = input(label)
-    while not re.match(reg_exp, coordinate):
-        coordinate = input(label)
+    if not re.match(reg_exp, coordinate):
+        return False
 
     return float(coordinate)
 
@@ -56,9 +56,18 @@ if __name__ == '__main__':
     deserializes_json = load_data(file_bars_path)
     if deserializes_json:
         bars = deserializes_json['features']
+
+        longitude = get_gps_coordinates('Введите долготу: ')
+        if not longitude:
+            exit('долготу должна быть числом, например 33.33')
+
+        latitude = get_gps_coordinates('Введите широту: ')
+        if not latitude:
+            exit('широта должна быть числом, например 33.33')
+
         coordinates = [
-            get_gps_coordinates('Введите долготу: '),
-            get_gps_coordinates('Введите широту: ')
+            longitude,
+            latitude
         ]
 
         bar = get_closest_bar(bars, coordinates)
